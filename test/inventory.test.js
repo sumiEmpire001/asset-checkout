@@ -1,0 +1,12 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {addAsset,checkout,checkin,searchAssets} from "../inventory.js";
+const seed=()=>addAsset([],{id:"A1",name:"Projector"});
+test("add equipment",()=>assert.equal(seed().length,1));
+test("duplicate ID rejected",()=>assert.throws(()=>addAsset(seed(),{id:"A1",name:"Other"})));
+test("checkout stores borrower",()=>assert.equal(checkout(seed(),"A1","Ada","2026-11-05")[0].borrower,"Ada"));
+test("double checkout rejected",()=>assert.throws(()=>checkout(checkout(seed(),"A1","Ada","2026-11-05"),"A1","Bob","2026-11-05")));
+test("checkin clears borrower",()=>assert.equal(checkin(checkout(seed(),"A1","Ada","2026-11-05"),"A1")[0].borrower,null));
+test("cannot check in available asset",()=>assert.throws(()=>checkin(seed(),"A1")));
+test("search by name",()=>assert.equal(searchAssets(seed(),"project").length,1));
+test("invalid borrower",()=>assert.throws(()=>checkout(seed(),"A1","X","2026-11-05")));
